@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="JAL" />
+<meta name="theme-color" content="#0f0e0c" />
+<title>JAL</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230f0e0c'/%3E%3Ctext x='90' y='118' font-family='Georgia, serif' font-size='80' font-style='italic' font-weight='900' fill='%23d4a574' text-anchor='middle'%3EJAL%3C/text%3E%3C/svg%3E" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet" />
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0f0e0c; min-height: 100vh; }
+  body { font-family: Georgia, "Times New Roman", serif; color: #e8e4dc; }
+  input, textarea, button { font-family: inherit; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin 1s linear infinite; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+const Icon = ({ d, size = 16, style = {}, strokeWidth = 2 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>{d}</svg>
+);
+const Plus = (p) => <Icon {...p} d={<><path d="M12 5v14"/><path d="M5 12h14"/></>} />;
+const Check = (p) => <Icon {...p} d={<polyline points="20 6 9 17 4 12"/>} />;
+const Trash2 = (p) => <Icon {...p} d={<><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></>} />;
+const Clock = (p) => <Icon {...p} d={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />;
+const Users = (p) => <Icon {...p} d={<><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>} />;
+const Heart = (p) => <Icon {...p} d={<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>} />;
+const Briefcase = (p) => <Icon {...p} d={<><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>} />;
+const ChevronLeft = (p) => <Icon {...p} d={<polyline points="15 18 9 12 15 6"/>} />;
+const ChevronRight = (p) => <Icon {...p} d={<polyline points="9 18 15 12 9 6"/>} />;
+const Loader2 = (p) => <Icon {...p} d={<path d="M21 12a9 9 0 1 1-6.219-8.56"/>} />;
+const Mic = (p) => <Icon {...p} d={<><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>} />;
+const MicOff = (p) => <Icon {...p} d={<><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>} />;
+const MessageSquare = (p) => <Icon {...p} d={<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>} />;
+const FolderOpen = (p) => <Icon {...p} d={<path d="M6 14l1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/>} />;
+const Pencil = (p) => <Icon {...p} d={<><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></>} />;
+const ArrowLeft = (p) => <Icon {...p} d={<><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></>} />;
+
+const storage = {
+  get: async (key) => { const v = localStorage.getItem(key); return v ? { value: v } : null; },
+  set: async (key, value) => { localStorage.setItem(key, value); return true; },
+};
+
+const ACCENTS = {
+  self: { ring: '#d4a574', label: 'YOURS', icon: Briefcase },
+  editor1: { ring: '#7a9b8e', label: 'JORDAN', icon: Users },
+  editor2: { ring: '#9b7a8e', label: 'DAKOTA', icon: Users },
+  ministry: { ring: '#c4956c', label: 'PASTORAL', icon: Heart },
+  oneonone: { ring: '#8a9bc4', label: '1:1 PREP', icon: MessageSquare },
+};
+
+const QUESTIONS = {
+  shared: {
+    title: 'Weekly Cheat Sheet',
+    subtitle: 'The standing rundown for both editors',
+    items: [
+      { id: 'pulse', q: 'Creative pulse — how are you feeling creatively? Any inspiration or burnout this week?', kind: 'wellbeing' },
+      { id: 'highlights', q: "Last week's highlights — what projects moved forward? Any wins or breakthroughs?", kind: 'work' },
+      { id: 'roadblocks', q: 'Roadblocks & challenges — any technical issues, feedback loops, or creative blocks? What slowed you down?', kind: 'work' },
+      { id: 'priorities', q: "This week's priorities — what edits, drafts, or reviews are on your plate? Any deadlines or client deliverables?", kind: 'work' },
+      { id: 'support', q: 'Support needed — assets, feedback, or help from the team? Any blockers I can clear?', kind: 'work' },
+      { id: 'tools', q: 'Tools & techniques — any plug-ins, shortcuts, or workflows worth sharing?', kind: 'growth' },
+      { id: 'shoutouts', q: 'Shoutouts & updates — anyone to recognize? Anything team-wide I should know?', kind: 'wellbeing' },
+      { id: 'open', q: 'Open floor — anything else on your mind? Suggestions, ideas, feedback?', kind: 'wellbeing' },
+    ],
+  },
+  editor1: {
+    title: 'For Jordan',
+    subtitle: 'Treat as a peer; pull rather than push',
+    items: [
+      { id: 's1', q: "What's a project you wish you owned more of?", kind: 'growth' },
+      { id: 's2', q: 'Where are you growing bored or under-challenged?', kind: 'growth' },
+      { id: 's3', q: 'Anything happening on the team I should know about that I might be missing?', kind: 'work' },
+      { id: 's4', q: "How's the workload — sustainable, or starting to fray?", kind: 'wellbeing' },
+      { id: 's5', q: 'What would make next week feel like a great week?', kind: 'wellbeing' },
+    ],
+  },
+  editor2: {
+    title: 'For Dakota',
+    subtitle: 'Coach mode; specific & developmental',
+    items: [
+      { id: 'a1', q: "What's one technical skill you want to be stronger in by next month?", kind: 'growth' },
+      { id: 'a2', q: 'What feedback from the past week is sitting with you?', kind: 'growth' },
+      { id: 'a3', q: 'When did you feel most confident? Least confident?', kind: 'wellbeing' },
+      { id: 'a4', q: 'Walk me through one decision you made this week and your reasoning.', kind: 'growth' },
+      { id: 'a5', q: "What's a habit you're trying to build right now — at work or outside?", kind: 'wellbeing' },
+    ],
+  },
+};
+
+const KIND_COLORS = { work: '#7a9b8e', growth: '#d4a574', wellbeing: '#c4956c' };
+const STORAGE_KEY = 'jal-data-v2';
+const NAMES_KEY = 'jal-names-v2';
+const PROJECTS_KEY = 'jal-projects-v2';
+const STATUSES = [
+  { id: 'active', label: 'Active', color: '#7a9b8e' },
+  { id: 'planning', label: 'Planning', color: '#8a9bc4' },
+  { id: 'paused', label: 'Paused', color: '#c4956c' },
+  { id: 'review', label: 'In Review', color: '#d4a574' },
+  { id: 'done', label: 'Complete', color: '#5a7a6c' },
+];
+const navBtn = { background: 'transparent', border: '1px solid #2a2722', borderRadius: '2px', padding: '8px 10px', color: '#a8a092', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+
+function App() {
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [data, setData] = useState({});
+  const [names, setNames] = useState({ editor1: 'Jordan', editor2: 'Dakota' });
+  const [activeTrack, setActiveTrack] = useState('self');
+  const [newTask, setNewTask] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [editingName, setEditingName] = useState(null);
+  const [listening, setListening] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [view, setView] = useState('daily');
+  const [activeProjectId, setActiveProjectId] = useState(null);
+  const recognitionRef = useRef(null);
+  const speechSupported = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  useEffect(() => {
+    (async () => {
+      try { const s = await storage.get(STORAGE_KEY); if (s?.value) setData(JSON.parse(s.value)); }
