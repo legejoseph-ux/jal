@@ -1,86 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="JAL" />
-<meta name="theme-color" content="#0f0e0c" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
 <title>JAL</title>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230f0e0c'/%3E%3Ctext x='90' y='118' font-family='Georgia, serif' font-size='80' font-style='italic' font-weight='900' fill='%23d4a574' text-anchor='middle'%3EJAL%3C/text%3E%3C/svg%3E" />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap" rel="stylesheet" />
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; background: #0f0e0c; min-height: 100vh; }
-  body { font-family: Georgia, "Times New Roman", serif; color: #e8e4dc; }
-  input, textarea, button { font-family: inherit; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spin { animation: spin 1s linear infinite; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #1a1816; color: #e8e3da; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  #root { min-height: 100vh; }
+  button { font-family: inherit; }
+  input, textarea { font-family: inherit; background: #232020; color: #e8e3da; border: 1px solid #2a2722; border-radius: 6px; padding: 8px 10px; }
+  input:focus, textarea:focus { outline: 1px solid #7a9b8e; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #2a2722; border-radius: 3px; }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel" data-presets="react">
 const { useState, useEffect, useRef } = React;
-const Icon = ({ d, size = 16, style = {}, strokeWidth = 2 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
-    strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" style={style}>{d}</svg>
-);
-const Plus = (p) => <Icon {...p} d={<><path d="M12 5v14"/><path d="M5 12h14"/></>} />;
-const Check = (p) => <Icon {...p} d={<polyline points="20 6 9 17 4 12"/>} />;
-const Trash2 = (p) => <Icon {...p} d={<><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></>} />;
-const Clock = (p) => <Icon {...p} d={<><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>} />;
-const Users = (p) => <Icon {...p} d={<><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></>} />;
-const Heart = (p) => <Icon {...p} d={<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>} />;
-const Briefcase = (p) => <Icon {...p} d={<><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></>} />;
-const ChevronLeft = (p) => <Icon {...p} d={<polyline points="15 18 9 12 15 6"/>} />;
-const ChevronRight = (p) => <Icon {...p} d={<polyline points="9 18 15 12 9 6"/>} />;
-const Loader2 = (p) => <Icon {...p} d={<path d="M21 12a9 9 0 1 1-6.219-8.56"/>} />;
-const Mic = (p) => <Icon {...p} d={<><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>} />;
-const MicOff = (p) => <Icon {...p} d={<><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>} />;
-const MessageSquare = (p) => <Icon {...p} d={<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>} />;
-const FolderOpen = (p) => <Icon {...p} d={<path d="M6 14l1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/>} />;
-const Pencil = (p) => <Icon {...p} d={<><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></>} />;
-const ArrowLeft = (p) => <Icon {...p} d={<><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></>} />;
 
+// ---------- Persistence (localStorage, matches original keys so existing data reconnects) ----------
 const storage = {
-  get: async (key) => { const v = localStorage.getItem(key); return v ? { value: v } : null; },
-  set: async (key, value) => { localStorage.setItem(key, value); return true; },
-};
-
-const ACCENTS = {
-  self: { ring: '#d4a574', label: 'YOURS', icon: Briefcase },
-  editor1: { ring: '#7a9b8e', label: 'JORDAN', icon: Users },
-  editor2: { ring: '#9b7a8e', label: 'DAKOTA', icon: Users },
-  ministry: { ring: '#c4956c', label: 'PASTORAL', icon: Heart },
-  oneonone: { ring: '#8a9bc4', label: '1:1 PREP', icon: MessageSquare },
-};
-
-const QUESTIONS = {
-  shared: {
-    title: 'Weekly Cheat Sheet',
-    subtitle: 'The standing rundown for both editors',
-    items: [
-      { id: 'pulse', q: 'Creative pulse — how are you feeling creatively? Any inspiration or burnout this week?', kind: 'wellbeing' },
-      { id: 'highlights', q: "Last week's highlights — what projects moved forward? Any wins or breakthroughs?", kind: 'work' },
-      { id: 'roadblocks', q: 'Roadblocks & challenges — any technical issues, feedback loops, or creative blocks? What slowed you down?', kind: 'work' },
-      { id: 'priorities', q: "This week's priorities — what edits, drafts, or reviews are on your plate? Any deadlines or client deliverables?", kind: 'work' },
-      { id: 'support', q: 'Support needed — assets, feedback, or help from the team? Any blockers I can clear?', kind: 'work' },
-      { id: 'tools', q: 'Tools & techniques — any plug-ins, shortcuts, or workflows worth sharing?', kind: 'growth' },
-      { id: 'shoutouts', q: 'Shoutouts & updates — anyone to recognize? Anything team-wide I should know?', kind: 'wellbeing' },
-      { id: 'open', q: 'Open floor — anything else on your mind? Suggestions, ideas, feedback?', kind: 'wellbeing' },
-    ],
+  async get(key) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      return raw === null ? null : { key, value: raw };
+    } catch (err) {
+      console.error('storage.get failed:', err);
+      return null;
+    }
   },
+  async set(key, value) {
+    try {
+      window.localStorage.setItem(key, value);
+      return { key, value };
+    } catch (err) {
+      console.error('storage.set failed:', err);
+      return null;
+    }
+  }
+};
+
+// ---------- Weekly Cheat Sheet (preserved from surviving file) ----------
+const CHEAT_SHEET = {
   editor1: {
     title: 'For Jordan',
-    subtitle: 'Treat as a peer; pull rather than push',
+    subtitle: 'Anchor mode; growth & calibration',
     items: [
-      { id: 's1', q: "What's a project you wish you owned more of?", kind: 'growth' },
+      { id: 's1', q: 'What are you most proud of from this week?', kind: 'growth' },
       { id: 's2', q: 'Where are you growing bored or under-challenged?', kind: 'growth' },
       { id: 's3', q: 'Anything happening on the team I should know about that I might be missing?', kind: 'work' },
       { id: 's4', q: "How's the workload — sustainable, or starting to fray?", kind: 'wellbeing' },
@@ -111,7 +83,26 @@ const STATUSES = [
   { id: 'review', label: 'In Review', color: '#d4a574' },
   { id: 'done', label: 'Complete', color: '#5a7a6c' },
 ];
+
 const navBtn = { background: 'transparent', border: '1px solid #2a2722', borderRadius: '2px', padding: '8px 10px', color: '#a8a092', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' };
+
+// ---------- Track definitions ----------
+const TRACKS = [
+  { id: 'self', label: 'Yours', color: '#a8a092' },
+  { id: 'editor1', label: 'Jordan', color: '#7a9b8e' },
+  { id: 'editor2', label: 'Dakota', color: '#c4956c' },
+  { id: 'pastoral', label: 'Pastoral', color: '#d4a574' },
+  { id: 'prep', label: '1:1 Prep', color: '#8a9bc4' },
+];
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function dayName(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+}
 
 function App() {
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -128,6 +119,518 @@ function App() {
   const recognitionRef = useRef(null);
   const speechSupported = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
 
+  // ---- Load persisted data on mount ----
   useEffect(() => {
     (async () => {
-      try { const s = await storage.get(STORAGE_KEY); if (s?.value) setData(JSON.parse(s.value)); }
+      try {
+        const s = await storage.get(STORAGE_KEY);
+        if (s?.value) setData(JSON.parse(s.value));
+      } catch (err) {
+        console.error('Failed to load task data:', err);
+      }
+      try {
+        const n = await storage.get(NAMES_KEY);
+        if (n?.value) setNames(JSON.parse(n.value));
+      } catch (err) {
+        console.error('Failed to load names:', err);
+      }
+      try {
+        const p = await storage.get(PROJECTS_KEY);
+        if (p?.value) setProjects(JSON.parse(p.value));
+      } catch (err) {
+        console.error('Failed to load projects:', err);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  // ---- Persist on change (skip the initial load) ----
+  useEffect(() => {
+    if (loading) return;
+    storage.set(STORAGE_KEY, JSON.stringify(data));
+  }, [data, loading]);
+
+  useEffect(() => {
+    if (loading) return;
+    storage.set(NAMES_KEY, JSON.stringify(names));
+  }, [names, loading]);
+
+  useEffect(() => {
+    if (loading) return;
+    storage.set(PROJECTS_KEY, JSON.stringify(projects));
+  }, [projects, loading]);
+
+  // ---------- Task helpers ----------
+  function tasksFor(d, track) {
+    return (data[d] && data[d][track]) || [];
+  }
+
+  function addTask(track, text, projectId) {
+    if (!text.trim()) return;
+    setData(prev => {
+      const day = { ...(prev[date] || {}) };
+      const list = day[track] ? [...day[track]] : [];
+      list.push({ id: uid(), text: text.trim(), done: false, status: 'active', projectId: projectId || null });
+      day[track] = list;
+      return { ...prev, [date]: day };
+    });
+    setNewTask('');
+  }
+
+  function toggleTask(track, id) {
+    setData(prev => {
+      const day = { ...(prev[date] || {}) };
+      const list = (day[track] || []).map(t => t.id === id ? { ...t, done: !t.done } : t);
+      day[track] = list;
+      return { ...prev, [date]: day };
+    });
+  }
+
+  function setTaskStatus(track, id, status) {
+    setData(prev => {
+      const day = { ...(prev[date] || {}) };
+      const list = (day[track] || []).map(t => t.id === id ? { ...t, status } : t);
+      day[track] = list;
+      return { ...prev, [date]: day };
+    });
+  }
+
+  function deleteTask(track, id) {
+    setData(prev => {
+      const day = { ...(prev[date] || {}) };
+      const list = (day[track] || []).filter(t => t.id !== id);
+      day[track] = list;
+      return { ...prev, [date]: day };
+    });
+  }
+
+  function shiftDate(delta) {
+    const d = new Date(date + 'T00:00:00');
+    d.setDate(d.getDate() + delta);
+    setDate(d.toISOString().split('T')[0]);
+  }
+
+  // ---------- Voice dictation ----------
+  function startListening(track) {
+    if (!speechSupported) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SR();
+    rec.lang = 'en-US';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setNewTask(prev => (prev ? prev + ' ' : '') + transcript);
+    };
+    rec.onerror = () => setListening(null);
+    rec.onend = () => setListening(null);
+    recognitionRef.current = rec;
+    setListening(track);
+    rec.start();
+  }
+
+  function stopListening() {
+    if (recognitionRef.current) recognitionRef.current.stop();
+    setListening(null);
+  }
+
+  // ---------- Projects ----------
+  function addProject(name) {
+    if (!name.trim()) return;
+    setProjects(prev => [...prev, { id: uid(), name: name.trim(), status: 'planning', notes: '' }]);
+  }
+
+  function updateProjectStatus(id, status) {
+    setProjects(prev => prev.map(p => p.id === id ? { ...p, status } : p));
+  }
+
+  function updateProjectNotes(id, notes) {
+    setProjects(prev => prev.map(p => p.id === id ? { ...p, notes } : p));
+  }
+
+  function deleteProject(id) {
+    setProjects(prev => prev.filter(p => p.id !== id));
+    if (activeProjectId === id) setActiveProjectId(null);
+  }
+
+  // ---------- 1:1 prep banner logic ----------
+  const today = dayName(date);
+  const oneOnOneToday = today === 'Wednesday' ? 'editor1' : today === 'Thursday' ? 'editor2' : null;
+
+  if (loading) {
+    return <div style={{ padding: 40, color: '#a8a092', fontSize: 14 }}>Loading…</div>;
+  }
+
+  return (
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '20px 16px 60px' }}>
+      <Header view={view} setView={setView} />
+
+      {view === 'daily' && (
+        <DailyView
+          date={date}
+          shiftDate={shiftDate}
+          today={today}
+          oneOnOneToday={oneOnOneToday}
+          names={names}
+          activeTrack={activeTrack}
+          setActiveTrack={setActiveTrack}
+          tasksFor={tasksFor}
+          newTask={newTask}
+          setNewTask={setNewTask}
+          addTask={addTask}
+          toggleTask={toggleTask}
+          deleteTask={deleteTask}
+          setTaskStatus={setTaskStatus}
+          listening={listening}
+          startListening={startListening}
+          stopListening={stopListening}
+          speechSupported={speechSupported}
+          projects={projects}
+          editingName={editingName}
+          setEditingName={setEditingName}
+          setNames={setNames}
+        />
+      )}
+
+      {view === 'prep' && (
+        <PrepView names={names} />
+      )}
+
+      {view === 'projects' && (
+        <ProjectsView
+          projects={projects}
+          addProject={addProject}
+          updateProjectStatus={updateProjectStatus}
+          updateProjectNotes={updateProjectNotes}
+          deleteProject={deleteProject}
+          activeProjectId={activeProjectId}
+          setActiveProjectId={setActiveProjectId}
+        />
+      )}
+    </div>
+  );
+}
+
+function Header({ view, setView }) {
+  const tabs = [
+    { id: 'daily', label: 'Daily' },
+    { id: 'prep', label: 'Cheat Sheet' },
+    { id: 'projects', label: 'Projects' },
+  ];
+  return (<div style={{ marginBottom: 20 }}>
+      <div style={{ fontSize: 13, letterSpacing: '0.12em', color: '#5a554c', marginBottom: 12, textTransform: 'uppercase' }}>JAL</div>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setView(t.id)}
+            style={{
+              ...navBtn,
+              flex: 1,
+              padding: '10px 8px',
+              fontSize: 13,
+              borderColor: view === t.id ? '#7a9b8e' : '#2a2722',
+              color: view === t.id ? '#e8e3da' : '#a8a092',
+              background: view === t.id ? '#232826' : 'transparent',
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DailyView(props) {
+  const {
+    date, shiftDate, today, oneOnOneToday, names,
+    activeTrack, setActiveTrack, tasksFor,
+    newTask, setNewTask, addTask, toggleTask, deleteTask, setTaskStatus,
+    listening, startListening, stopListening, speechSupported,
+    projects, editingName, setEditingName, setNames,
+  } = props;
+
+  const trackLabel = (id) => {
+    if (id === 'editor1') return names.editor1;
+    if (id === 'editor2') return names.editor2;
+    return TRACKS.find(t => t.id === id)?.label || id;
+  };
+
+  return (
+    <div>
+      {/* Date nav */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+        <button style={navBtn} onClick={() => shiftDate(-1)}>‹</button>
+        <div style={{ flex: 1, textAlign: 'center' }}>
+          <div style={{ fontSize: 15, fontWeight: 600 }}>{today}</div>
+          <div style={{ fontSize: 12, color: '#5a554c' }}>{date}</div>
+        </div>
+        <button style={navBtn} onClick={() => shiftDate(1)}>›</button>
+      </div>
+
+      {oneOnOneToday && (
+        <div style={{
+          background: '#232826', border: '1px solid #3a4a44', borderRadius: 6,
+          padding: '10px 12px', marginBottom: 16, fontSize: 13, color: '#9bb8ab',
+        }}>
+          1:1 with {trackLabel(oneOnOneToday)} today — check the Cheat Sheet tab to prep.
+        </div>
+      )}
+
+      {/* Track tabs */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', paddingBottom: 4 }}>
+        {TRACKS.map(t => {
+          const isEditingThis = editingName === t.id && (t.id === 'editor1' || t.id === 'editor2');
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTrack(t.id)}
+              style={{
+                ...navBtn,
+                whiteSpace: 'nowrap',
+                fontSize: 13,
+                borderColor: activeTrack === t.id ? t.color : '#2a2722',
+                color: activeTrack === t.id ? '#e8e3da' : '#a8a092',
+                background: activeTrack === t.id ? '#232826' : 'transparent',
+              }}
+            >
+              {trackLabel(t.id)}
+            </button>
+          );
+        })}
+      </div>
+
+      {(activeTrack === 'editor1' || activeTrack === 'editor2') && (
+        <div style={{ marginBottom: 12 }}>
+          {editingName === activeTrack ? (
+            <input
+              autoFocus
+              defaultValue={names[activeTrack]}
+              onBlur={(e) => { setNames(prev => ({ ...prev, [activeTrack]: e.target.value || prev[activeTrack] })); setEditingName(null); }}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+              style={{ fontSize: 13, padding: '4px 8px' }}
+            />
+          ) : (
+            <button
+              onClick={() => setEditingName(activeTrack)}
+              style={{ background: 'none', border: 'none', color: '#5a554c', fontSize: 12, cursor: 'pointer', padding: 0 }}
+            >
+              rename {trackLabel(activeTrack)} ✎
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Add task */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <input
+          value={newTask}
+          onChange={(e) => setNewTask(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') addTask(activeTrack, newTask); }}
+          placeholder={`Add a task for ${trackLabel(activeTrack)}…`}
+          style={{ flex: 1 }}
+        />
+        {speechSupported && (
+          <button
+            style={{ ...navBtn, color: listening === activeTrack ? '#c4956c' : '#a8a092', borderColor: listening === activeTrack ? '#c4956c' : '#2a2722' }}
+            onClick={() => listening === activeTrack ? stopListening() : startListening(activeTrack)}
+          >
+            {listening === activeTrack ? '●' : '🎤'}
+          </button>
+        )}
+        <button style={{ ...navBtn, color: '#7a9b8e', borderColor: '#7a9b8e' }} onClick={() => addTask(activeTrack, newTask)}>+</button>
+      </div>
+
+      {/* Task list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {tasksFor(date, activeTrack).length === 0 && (
+          <div style={{ color: '#5a554c', fontSize: 13, padding: '20px 0', textAlign: 'center' }}>
+            Nothing here yet for {trackLabel(activeTrack)} on this day.
+          </div>
+        )}
+        {tasksFor(date, activeTrack).map(task => (
+          <TaskRow
+            key={task.id}
+            task={task}
+            onToggle={() => toggleTask(activeTrack, task.id)}
+            onDelete={() => deleteTask(activeTrack, task.id)}
+            onStatus={(s) => setTaskStatus(activeTrack, task.id, s)}
+            project={projects.find(p => p.id === task.projectId)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TaskRow({ task, onToggle, onDelete, onStatus }) {
+  const [showStatus, setShowStatus] = useState(false);
+  const statusInfo = STATUSES.find(s => s.id === task.status) || STATUSES[0];
+  return (
+    <div style={{ border: '1px solid #2a2722', borderRadius: 6, padding: '10px 12px', background: '#1f1d1a' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+        <button
+          onClick={onToggle}
+          style={{
+            width: 18, height: 18, minWidth: 18, borderRadius: 4, marginTop: 2,
+            border: `1.5px solid ${task.done ? '#5a7a6c' : '#5a554c'}`,
+            background: task.done ? '#5a7a6c' : 'transparent',
+            cursor: 'pointer', padding: 0,
+          }}
+        >
+          {task.done && <span style={{ color: '#1a1816', fontSize: 12 }}>✓</span>}
+        </button>
+        <div style={{ flex: 1, fontSize: 14, color: task.done ? '#5a554c' : '#e8e3da', textDecoration: task.done ? 'line-through' : 'none' }}>
+          {task.text}
+        </div>
+        <button onClick={onDelete} style={{ background: 'none', border: 'none', color: '#5a554c', cursor: 'pointer', fontSize: 16, padding: 0, lineHeight: 1 }}>×</button>
+      </div>
+      <div style={{ marginTop: 8, marginLeft: 28, position: 'relative' }}>
+        <button
+          onClick={() => setShowStatus(!showStatus)}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, color: statusInfo.color, display: 'flex', alignItems: 'center', gap: 5, padding: 0 }}
+        >
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: statusInfo.color, display: 'inline-block' }}></span>
+          {statusInfo.label}
+        </button>
+        {showStatus && (
+          <div style={{ position: 'absolute', top: 18, left: 0, background: '#232020', border: '1px solid #2a2722', borderRadius: 6, padding: 6, zIndex: 10, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {STATUSES.map(s => (
+              <button
+                key={s.id}
+                onClick={() => { onStatus(s.id); setShowStatus(false); }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, color: s.color, textAlign: 'left', padding: '4px 8px', whiteSpace: 'nowrap' }}
+              >
+                ● {s.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PrepView({ names }) {
+  const sheets = [
+    { ...CHEAT_SHEET.editor1, name: names.editor1, day: 'Wednesday' },
+    { ...CHEAT_SHEET.editor2, name: names.editor2, day: 'Thursday' },
+  ];
+  return (
+    <div>
+      <div style={{ fontSize: 13, color: '#5a554c', marginBottom: 16 }}>
+        Weekly 1:1 cheat sheet — glance before each conversation.
+      </div>
+      {sheets.map((sheet, idx) => (
+        <div key={idx} style={{ marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 4 }}>
+            <div style={{ fontSize: 16, fontWeight: 600 }}>{sheet.name}</div>
+            <div style={{ fontSize: 12, color: '#5a554c' }}>{sheet.day}</div>
+          </div>
+          <div style={{ fontSize: 12, color: '#8a8478', marginBottom: 10, fontStyle: 'italic' }}>{sheet.subtitle}</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {sheet.items.map(item => (
+              <div key={item.id} style={{ border: '1px solid #2a2722', borderRadius: 6, padding: '10px 12px', background: '#1f1d1a', borderLeft: `3px solid ${KIND_COLORS[item.kind]}` }}>
+                <div style={{ fontSize: 13.5 }}>{item.q}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProjectsView({ projects, addProject, updateProjectStatus, updateProjectNotes, deleteProject, activeProjectId, setActiveProjectId }) {
+  const [newProject, setNewProject] = useState('');
+  const active = projects.find(p => p.id === activeProjectId);
+
+  if (active) {
+    const statusInfo = STATUSES.find(s => s.id === active.status) || STATUSES[0];
+    return (
+      <div>
+        <button onClick={() => setActiveProjectId(null)} style={{ background: 'none', border: 'none', color: '#5a554c', cursor: 'pointer', fontSize: 13, marginBottom: 16, padding: 0 }}>← back to projects</button>
+        <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>{active.name}</div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+          {STATUSES.map(s => (
+            <button
+              key={s.id}
+              onClick={() => updateProjectStatus(active.id, s.id)}
+              style={{
+                ...navBtn, fontSize: 12, padding: '6px 10px',
+                borderColor: active.status === s.id ? s.color : '#2a2722',
+                color: active.status === s.id ? s.color : '#a8a092',
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <textarea
+          value={active.notes}
+          onChange={(e) => updateProjectNotes(active.id, e.target.value)}
+          placeholder="Notes…"
+          style={{ width: '100%', minHeight: 160, resize: 'vertical' }}
+        />
+        <button
+          onClick={() => deleteProject(active.id)}
+          style={{ ...navBtn, color: '#c4956c', borderColor: '#c4956c', marginTop: 16, width: '100%' }}
+        >
+          Delete project
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <input
+          value={newProject}
+          onChange={(e) => setNewProject(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { addProject(newProject); setNewProject(''); } }}
+          placeholder="New project name…"
+          style={{ flex: 1 }}
+        />
+        <button
+          style={{ ...navBtn, color: '#7a9b8e', borderColor: '#7a9b8e' }}
+          onClick={() => { addProject(newProject); setNewProject(''); }}
+        >
+          +
+        </button>
+      </div>
+      {projects.length === 0 && (
+        <div style={{ color: '#5a554c', fontSize: 13, padding: '20px 0', textAlign: 'center' }}>No projects yet.</div>
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {projects.map(p => {
+          const statusInfo = STATUSES.find(s => s.id === p.status) || STATUSES[0];
+          return (
+            <button
+              key={p.id}
+              onClick={() => setActiveProjectId(p.id)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                border: '1px solid #2a2722', borderRadius: 6, padding: '12px 14px',
+                background: '#1f1d1a', cursor: 'pointer', textAlign: 'left', color: '#e8e3da',
+              }}
+            >
+              <span style={{ fontSize: 14 }}>{p.name}</span>
+              <span style={{ fontSize: 11, color: statusInfo.color, display: 'flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: statusInfo.color, display: 'inline-block' }}></span>
+                {statusInfo.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+</script>
+</body>
+</html>
