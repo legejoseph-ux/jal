@@ -102,6 +102,13 @@ const NAMES_KEY = 'jal-names-v2';
 const PROJECTS_KEY = 'jal-projects-v2';
 const NOTES_KEY = 'jal-notes-v1';
 const INSPIRATION_KEY = 'jal-inspiration-v1';
+const DISCUSSION_KEY = 'jal-discussion-v1';
+const DISCUSSION_TAGS = [
+  { id: 'skill', label: 'Skill gap', color: '#d4a574' },
+  { id: 'ownership', label: 'Ownership', color: '#c4956c' },
+  { id: 'communication', label: 'Communication', color: '#8a9bc4' },
+  { id: 'other', label: 'Other', color: '#a8a092' },
+];
 const SCHEDULE_START_HOUR = 8;
 const SCHEDULE_START_MIN = 30;
 const SCHEDULE_END_HOUR = 16;
@@ -173,6 +180,7 @@ function App() {
   const [notes, setNotes] = useState({});
   const [inspirationLinks, setInspirationLinks] = useState([]);
   const [newInspiration, setNewInspiration] = useState('');
+  const [discussionQueue, setDiscussionQueue] = useState({});
   const [view, setView] = useState('daily');
   const [activeProjectId, setActiveProjectId] = useState(null);
   const recognitionRef = useRef(null);
@@ -211,6 +219,12 @@ function App() {
       } catch (err) {
         console.error('Failed to load inspiration links:', err);
       }
+      try {
+        const dq = await storage.get(DISCUSSION_KEY);
+        if (dq?.value) setDiscussionQueue(JSON.parse(dq.value));
+      } catch (err) {
+        console.error('Failed to load discussion queue:', err);
+      }
       setLoading(false);
       setTimeout(() => { isFirstLoad.current = false; }, 0);
     })();
@@ -240,6 +254,11 @@ function App() {
     if (loading || isFirstLoad.current) return;
     storage.set(INSPIRATION_KEY, JSON.stringify(inspirationLinks));
   }, [inspirationLinks, loading]);
+
+  useEffect(() => {
+    if (loading || isFirstLoad.current) return;
+    storage.set(DISCUSSION_KEY, JSON.stringify(discussionQueue));
+  }, [discussionQueue, loading]);
 
   function tasksFor(d, track) {
     return (data[d] && data[d][track]) || [];
@@ -416,6 +435,35 @@ function App() {
     setInspirationLinks(prev => prev.filter(l => l.id !== id));
   }
 
+  function discussionItemsFor(track) {
+    return discussionQueue[track] || [];
+  }
+
+  function addDiscussionItem(track, text, tag) {
+    if (!text.trim()) return;
+    const now = new Date();
+    const stamp = now.toLocaleDateString(undefined, { month: '2-digit', day: '2-digit' }) + ' · ' + now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    setDiscussionQueue(prev => {
+      const list = prev[track] ? [...prev[track]] : [];
+      list.unshift({ id: uid(), text: text.trim(), tag, stamp, resolved: false });
+      return { ...prev, [track]: list };
+    });
+  }
+
+  function toggleDiscussionItem(track, id) {
+    setDiscussionQueue(prev => {
+      const list = (prev[track] || []).map(i => i.id === id ? { ...i, resolved: !i.resolved } : i);
+      return { ...prev, [track]: list };
+    });
+  }
+
+  function deleteDiscussionItem(track, id) {
+    setDiscussionQueue(prev => {
+      const list = (prev[track] || []).filter(i => i.id !== id);
+      return { ...prev, [track]: list };
+    });
+  }
+
   function exportBackup() {
     const backup = {
       exportedAt: new Date().toISOString(),
@@ -486,6 +534,10 @@ function App() {
           setNewInspiration={setNewInspiration}
           addInspirationLink={addInspirationLink}
           deleteInspirationLink={deleteInspirationLink}
+          discussionItemsFor={discussionItemsFor}
+          addDiscussionItem={addDiscussionItem}
+          toggleDiscussionItem={toggleDiscussionItem}
+          deleteDiscussionItem={deleteDiscussionItem}
           exportBackup={exportBackup}
         />
       )}
@@ -552,6 +604,7 @@ function DailyView(props) {
     getScheduleSlot, setScheduleSlot,
     getDevotion, setDevotion, getLunch, setLunch,
     inspirationLinks, newInspiration, setNewInspiration, addInspirationLink, deleteInspirationLink,
+    discussionItemsFor, addDiscussionItem, toggleDiscussionItem, deleteDiscussionItem,
     exportBackup,
   } = props;
   const [showSchedule, setShowSchedule] = useState(false);
@@ -745,6 +798,16 @@ function DailyView(props) {
         );
       })()}
 
+      {(activeTrack === 'editor1' || activeTrack === 'editor2') && (
+        <DiscussionQueue
+          trackLabel={trackLabel(activeTrack)}
+          items={discussionItemsFor(activeTrack)}
+          onAdd={(text, tag) => addDiscussionItem(activeTrack, text, tag)}
+          onToggle={(id) => toggleDiscussionItem(activeTrack, id)}
+          onDelete={(id) => deleteDiscussionItem(activeTrack, id)}
+        />
+      )}
+
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 11, color: '#5a554c', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           Notes for {trackLabel(activeTrack)}
@@ -856,6 +919,118 @@ function TaskRow({ task, onToggle, onDelete, onStatus }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function DiscussionQueue({ trackLabel, items, onAdd, onToggle, onDelete }) {
+  const [draft, setDraft] = useState('');
+  const [tag, setTag] = useState('skill');
+  const [showResolved, setShowResolved] = useState(false);
+
+  const active = items.filter(i => !i.resolved);
+  const resolved = items.filter(i => i.resolved);
+
+  function handleAdd() {
+    if (!draft.trim()) return;
+    onAdd(draft, tag);
+    setDraft('');
+  }
+
+  return (
+    <div style={{ marginBottom: 16, padding: 12, background: '#1f1d1a', border: '1px solid #2a2722', borderRadius: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{ fontSize: 11, color: '#5a554c', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          To discuss with {trackLabel}
+        </div>
+        {active.length > 0 && (
+          <div style={{ fontSize: 11, color: '#5a554c' }}>{active.length} pending</div>
+        )}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
+          placeholder="What do you want to bring up…"
+          style={{ flex: 1, fontSize: 13 }}
+        />
+        <button style={{ ...navBtn, color: '#7a9b8e', borderColor: '#7a9b8e' }} onClick={handleAdd}>+</button>
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: (active.length || resolved.length) ? 10 : 0 }}>
+        {DISCUSSION_TAGS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTag(t.id)}
+            style={{
+              background: 'none',
+              border: `1px solid ${tag === t.id ? t.color : '#2a2722'}`,
+              borderRadius: 10,
+              padding: '3px 9px',
+              fontSize: 11,
+              color: tag === t.id ? t.color : '#5a554c',
+              cursor: 'pointer',
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {active.length === 0 && resolved.length === 0 && (
+        <div style={{ color: '#5a554c', fontSize: 12.5, padding: '6px 0', textAlign: 'center' }}>
+          Nothing queued.
+        </div>
+      )}
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {active.map(item => {
+          const tagInfo = DISCUSSION_TAGS.find(t => t.id === item.tag) || DISCUSSION_TAGS[3];
+          return (
+            <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '6px 0' }}>
+              <button
+                onClick={() => onToggle(item.id)}
+                style={{
+                  width: 14, height: 14, minWidth: 14, borderRadius: 3, marginTop: 2,
+                  border: '1px solid #3a362f', background: 'transparent', cursor: 'pointer', padding: 0,
+                }}
+              />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                  <span style={{ fontSize: 10, color: tagInfo.color }}>{tagInfo.label}</span>
+                  <span style={{ fontSize: 10, color: '#5a554c' }}>{item.stamp}</span>
+                </div>
+                <div style={{ fontSize: 13, color: '#e8e3da', lineHeight: 1.4 }}>{item.text}</div>
+              </div>
+              <button onClick={() => onDelete(item.id)} style={{ background: 'none', border: 'none', color: '#5a554c', cursor: 'pointer', fontSize: 14, padding: 0, lineHeight: 1 }}>×</button>
+            </div>
+          );
+        })}
+      </div>
+
+      {resolved.length > 0 && (
+        <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #232020' }}>
+          <button
+            onClick={() => setShowResolved(!showResolved)}
+            style={{ background: 'none', border: 'none', color: '#5a554c', fontSize: 11, cursor: 'pointer', padding: 0 }}
+          >
+            Discussed ({resolved.length}) {showResolved ? '−' : '+'}
+          </button>
+          {showResolved && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+              {resolved.map(item => (
+                <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 8, opacity: 0.55 }}>
+                  <span style={{ fontSize: 10, color: '#5a554c', minWidth: 50 }}>{item.stamp}</span>
+                  <span style={{ flex: 1, fontSize: 12.5, color: '#8a8478', textDecoration: 'line-through' }}>{item.text}</span>
+                  <button onClick={() => onToggle(item.id)} style={{ background: 'none', border: 'none', color: '#5a554c', cursor: 'pointer', fontSize: 11, padding: 0 }}>↺</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
